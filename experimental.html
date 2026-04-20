@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vladimir Nesterov — Experimental 3D Portfolio</title>
+    <meta name="description" content="UX Design Lead & Product Manager with 15+ years in FinTech, banking, and telecom. Interactive 3D cube and infinite scroll experience.">
+    <meta property="og:title" content="Vladimir Nesterov — Experimental 3D Portfolio">
+    <meta property="og:description" content="Interactive 3D cube and infinite scroll experience.">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1558655146-364adaf1fcc9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&h=630&q=80">
+    <meta property="og:url" content="https://unclebob812.github.io/Portfolio-2026/experimental.html">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:creator" content="@uncleBob812">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <style>
+        /* Experimental page specific styles */
+        body {
+            overflow-x: hidden;
+            overflow-y: scroll;
+            height: 100vh;
+            margin: 0;
+            cursor: none;
+        }
+
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .sections {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 120px 0;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section h1, .section h2 {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            color: #d4f060;
+            margin-bottom: 1rem;
+        }
+
+        .section h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 1;
+        }
+
+        .section h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+        }
+
+        .section p {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 300;
+            color: #aaaaaa;
+            font-size: clamp(1rem, 2vw, 1.125rem);
+            max-width: 800px;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .section .tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: #161616;
+            color: #aaaaaa;
+            font-size: 0.75rem;
+            border-radius: 0;
+            margin-right: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .project-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-top: 3rem;
+        }
+
+        .project {
+            background-color: #111111;
+            border: 1px solid #222222;
+            padding: 2rem;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        .project:hover {
+            transform: translateY(-8px);
+            background-color: #161616;
+        }
+
+        .process-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-top: 3rem;
+        }
+
+        .step {
+            border: 1px solid #222222;
+            padding: 2rem;
+        }
+
+        .step-number {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            color: #d4f060;
+            margin-bottom: 1rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            width: 100%;
+            margin-top: 3rem;
+        }
+
+        .testimonial {
+            border: 1px solid #222222;
+            padding: 2rem;
+        }
+
+        .contact-button {
+            display: inline-block;
+            background-color: #d4f060;
+            color: #0a0a0a;
+            padding: 1rem 2rem;
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            text-decoration: none;
+            border-radius: 0;
+            transition: transform 0.2s ease;
+            margin-top: 2rem;
+        }
+
+        .contact-button:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .nav-switch a {
+            color: #d4f060;
+            text-decoration: none;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 500;
+            background-color: rgba(10, 10, 10, 0.8);
+            padding: 0.5rem 1rem;
+            border: 1px solid #222222;
+        }
+
+        .cursor-dot,
+        .cursor-ring {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            mix-blend-mode: difference;
+            transform: translate(-50%, -50%);
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #d4f060;
+            border-radius: 50%;
+            transition: width 0.2s, height 0.2s;
+        }
+
+        .cursor-ring {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #d4f060;
+            border-radius: 50%;
+            transition: width 0.3s, height 0.3s, opacity 0.3s;
+        }
+
+        body:hover .cursor-dot {
+            width: 12px;
+            height: 12px;
+        }
+
+        body:hover .cursor-ring {
+            width: 60px;
+            height: 60px;
+        }
+
+        @media (max-width: 767px) {
+            .project-grid,
+            .process-steps,
+            .testimonials-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-ring"></div>
+
+    <div class="nav-switch">
+        <a href="index.html">← Classic Version</a>
+    </div>
+
+    <div id="canvas-container"></div>
+
+    <div class="sections">
+        <!-- Hero Section -->
+        <section class="section active" id="hero">
+            <div class="hero-status">
+                <span class="status-dot" style="display: inline-block; width: 10px; height: 10px; background-color: #d4f060; border-radius: 50%; margin-right: 8px; animation: pulse 2s infinite;"></span>
+                <span class="status-text" style="font-size: 0.9rem; color: #aaaaaa;">Available for select projects</span>
+            </div>
+            <h1>UX Design Lead<br>& Product Manager</h1>
+            <p>
+                Crafting high‑impact digital experiences for FinTech, Banking, and emerging tech.
+            </p>
+            <div class="hero-marquee" style="overflow: hidden; margin-top: 3rem; border-top: 1px solid #222; border-bottom: 1px solid #222; padding: 1rem 0;">
+                <div class="marquee-track" style="display: flex; animation: marquee 30s linear infinite; white-space: nowrap;">
+                    <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); color: #666; margin-right: 4rem;">Product Strategy</span>
+                    <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); color: #666; margin-right: 4rem;">Design Systems</span>
+                    <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); color: #666; margin-right: 4rem;">UX Research</span>
+                    <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); color: #666; margin-right: 4rem;">AR/VR Prototyping</span>
+                    <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); color: #666; margin-right: 4rem;">Motion Design</span>
+                    <span style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.5rem, 3vw, 2.5rem); color: #666; margin-right: 4rem;">AI‑Driven Interfaces</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section class="section" id="about">
+            <h2>Impact by Numbers</h2>
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 3rem;">
+                <div class="stat" style="border: 1px solid #222; padding: 2rem;">
+                    <div class="stat-number" style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 5vw, 3.5rem); color: #d4f060; line-height: 1;">15+</div>
+                    <div class="stat-label" style="font-size: 0.9rem; color: #aaaaaa; margin-top: 0.5rem;">Years Experience</div>
+                </div>
+                <div class="stat" style="border: 1px solid #222; padding: 2rem;">
+                    <div class="stat-number" style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 5vw, 3.5rem); color: #d4f060; line-height: 1;">42</div>
+                    <div class="stat-label" style="font-size: 0.9rem; color: #aaaaaa; margin-top: 0.5rem;">Products Shipped</div>
+                </div>
+                <div class="stat" style="border: 1px solid #222; padding: 2rem;">
+                    <div class="stat-number" style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 5vw, 3.5rem); color: #d4f060; line-height: 1;">2</div>
+                    <div class="stat-label" style="font-size: 0.9rem; color: #aaaaaa; margin-top: 0.5rem;">Industries: Telecom + Banking</div>
+                </div>
+                <div class="stat" style="border: 1px solid #222; padding: 2rem;">
+                    <div class="stat-number" style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2.5rem, 5vw, 3.5rem); color: #d4f060; line-height: 1;">11</div>
+                    <div class="stat-label" style="font-size: 0.9rem; color: #aaaaaa; margin-top: 0.5rem;">LinkedIn Recommendations</div>
+                </div>
+            </div>
+            <p>
+                <strong>Google‑Certified UX Designer</strong> with 15+ years of leadership in FinTech, banking, and telecom.
+                Graduated from Istituto Marangoni (Milan) with a degree in Art Direction, then spent 5 years shaping brand identities before transitioning to digital product design.
+            </p>
+            <p>
+                Over the past decade, I’ve led UX for major clients like Banco BPM, Fastweb, Deutsche Telekom, and Unicredit,
+                focusing on complex enterprise systems and mobile‑first banking applications.
+            </p>
+            <p>
+                <strong>Languages:</strong> English, Italian, Russian, Ukrainian.<br>
+                <strong>Based in Milan</strong> for ~10 years, working with international teams across Europe and the US.
+            </p>
+            <div class="client-logos" style="margin-top: 3rem;">
+                <div class="logos-strip" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2rem; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.125rem; color: #666;">
+                    <span>Banco BPM</span>
+                    <span>Unicredit</span>
+                    <span>Fastweb</span>
+                    <span>Deutsche Telekom</span>
+                    <span>Arval–BNP Paribas</span>
+                    <span>Brembo</span>
+                    <span>Zenith</span>
+                    <span>Momodesign</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Work Section -->
+        <section class="section" id="work">
+            <h2>Selected Projects</h2>
+            <div class="project-grid">
+                <article class="project">
+                    <div class="project-tags">
+                        <span class="tag" style="background-color: #f06040;">FinTech</span>
+                        <span class="tag">Mobile App</span>
+                    </div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem;">Banco BPM Mobile Banking</h3>
+                    <p style="color: #aaaaaa; margin-bottom: 1rem;">
+                        Defined enterprise‑wide mobile design standards for Italy’s third‑largest bank,
+                        impacting 4M+ users and earning a LinkedIn recommendation for setting new benchmarks.
+                    </p>
+                    <a href="cases/banco-bpm.html" style="color: #d4f060; text-decoration: none; font-weight: 500;">View Case Study →</a>
+                </article>
+                <article class="project">
+                    <div class="project-tags">
+                        <span class="tag" style="background-color: #f06040;">Telecom</span>
+                        <span class="tag">Enterprise UX</span>
+                    </div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem;">Fastweb: Grandi Aziende</h3>
+                    <p style="color: #aaaaaa; margin-bottom: 1rem;">
+                        Designed the enterprise portal for Italy’s leading telecom provider,
+                        streamlining complex service management for large‑business clients.
+                    </p>
+                    <a href="cases/fastweb.html" style="color: #d4f060; text-decoration: none; font-weight: 500;">View Case Study →</a>
+                </article>
+                <article class="project">
+                    <div class="project-tags">
+                        <span class="tag" style="background-color: #f06040;">Design System</span>
+                        <span class="tag">Open Source</span>
+                    </div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem;">Design System 2019</h3>
+                    <p style="color: #aaaaaa; margin-bottom: 1rem;">
+                        A modular, scalable design system shared on Behance with 11+ appreciations.
+                        Used as a foundation for multiple FinTech and telecom projects.
+                    </p>
+                    <a href="cases/design-system.html" style="color: #d4f060; text-decoration: none; font-weight: 500;">View Case Study →</a>
+                </article>
+                <article class="project">
+                    <div class="project-tags">
+                        <span class="tag" style="background-color: #f06040;">Telecom</span>
+                        <span class="tag">Design System</span>
+                    </div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.5rem; margin-bottom: 0.5rem;">Deutsche Telekom UX Framework</h3>
+                    <p style="color: #aaaaaa; margin-bottom: 1rem;">
+                        Created a unified UX framework for Europe’s largest telecom provider,
+                        ensuring consistency across 20+ product teams and 100+ screens.
+                    </p>
+                    <a href="cases/deutsche-telekom.html" style="color: #d4f060; text-decoration: none; font-weight: 500;">View Case Study →</a>
+                </article>
+            </div>
+        </section>
+
+        <!-- Process Section -->
+        <section class="section" id="process">
+            <h2>Strategic Framework</h2>
+            <div class="process-steps">
+                <div class="step">
+                    <div class="step-number">01</div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">Discover</h3>
+                    <p style="color: #aaaaaa; font-size: 0.9rem;">
+                        Deep dive into user needs, business goals, and technical constraints.
+                    </p>
+                </div>
+                <div class="step">
+                    <div class="step-number">02</div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">Define</h3>
+                    <p style="color: #aaaaaa; font-size: 0.9rem;">
+                        Shape the problem space, set success metrics, and align stakeholders.
+                    </p>
+                </div>
+                <div class="step">
+                    <div class="step-number">03</div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">Ideate</h3>
+                    <p style="color: #aaaaaa; font-size: 0.9rem;">
+                        Generate concepts, prototype rapidly, and test with real users.
+                    </p>
+                </div>
+                <div class="step">
+                    <div class="step-number">04</div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">Prototype</h3>
+                    <p style="color: #aaaaaa; font-size: 0.9rem;">
+                        Build high‑fidelity interactive prototypes for validation.
+                    </p>
+                </div>
+                <div class="step">
+                    <div class="step-number">05</div>
+                    <h3 style="font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.25rem; margin-bottom: 0.5rem;">Deliver</h3>
+                    <p style="color: #aaaaaa; font-size: 0.9rem;">
+                        Hand‑off with precision, support development, and measure impact.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Section -->
+        <section class="section" id="testimonials">
+            <h2>What Leaders Say</h2>
+            <div class="testimonials-grid">
+                <blockquote class="testimonial">
+                    <p style="font-size: 1.125rem; color: #aaaaaa; font-style: italic; margin-bottom: 1rem;">
+                        “Vladimir ha definito gli standard a livello aziendale per il mobile.”<br>
+                        (Vladimir defined company‑wide standards for mobile.)
+                    </p>
+                    <footer style="font-size: 0.9rem; color: #666;">
+                        <strong>Colleague</strong>, Banco BPM
+                    </footer>
+                </blockquote>
+                <blockquote class="testimonial">
+                    <p style="font-size: 1.125rem; color: #aaaaaa; font-style: italic; margin-bottom: 1rem;">
+                        “Bob is a chameleontic creative… from UX design to being just a good colleague.”
+                    </p>
+                    <footer style="font-size: 0.9rem; color: #666;">
+                        <strong>Former colleague</strong>, Momodesign
+                    </footer>
+                </blockquote>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="section" id="contact">
+            <h2>Let’s Build Something Remarkable</h2>
+            <p style="font-size: clamp(1rem, 2vw, 1.25rem); max-width: 600px; margin-bottom: 2rem;">
+                I’m currently open to select consulting engagements, speaking opportunities,
+                and advisory roles in FinTech, banking, and telecom.
+            </p>
+            <a href="mailto:mr.cubixxx@gmail.com" class="contact-button">mr.cubixxx@gmail.com</a>
+            <div style="margin-top: 2rem; display: flex; gap: 2rem;">
+                <a href="https://linkedin.com/in/vladimir-nesterov" style="color: #d4f060; text-decoration: none; font-weight: 500;">LinkedIn</a>
+                <a href="https://www.behance.net/mrcubixxx946f" style="color: #d4f060; text-decoration: none; font-weight: 500;">Behance</a>
+                <a href="https://github.com/uncleBob812" style="color: #d4f060; text-decoration: none; font-weight: 500;">GitHub</a>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // Custom cursor
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorRing = document.querySelector('.cursor-ring');
+
+        if (cursorDot && cursorRing) {
+            let mouseX = 0, mouseY = 0;
+            let dotX = 0, dotY = 0;
+            let ringX = 0, ringY = 0;
+            let dotSpeed = 0.2;
+            let ringSpeed = 0.1;
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+            });
+
+            function animateCursor() {
+                dotX += (mouseX - dotX) * dotSpeed;
+                dotY += (mouseY - dotY) * dotSpeed;
+                ringX += (dotX - ringX) * ringSpeed;
+                ringY += (dotY - ringY) * ringSpeed;
+
+                cursorDot.style.left = `${dotX}px`;
+                cursorDot.style.top = `${dotY}px`;
+                cursorRing.style.left = `${ringX}px`;
+                cursorRing.style.top = `${ringY}px`;
+
+                requestAnimationFrame(animateCursor);
+            }
+
+            animateCursor();
+
+            if ('ontouchstart' in window) {
+                cursorDot.style.display = 'none';
+                cursorRing.style.display = 'none';
+            }
+        }
+
+        // Three.js 3D Cube
+        const container = document.getElementById('canvas-container');
+        let scene, camera, renderer, cube;
+        let rotationX = 0;
+        let rotationY = 0;
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let scrollProgress = 0;
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.background = null;
+
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.z = 5;
+
+            renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Cube geometry
+            const geometry = new THREE.BoxGeometry(2, 2, 2);
+            const materials = [
+                new THREE.MeshBasicMaterial({ color: 0x0a0a0a, wireframe: true }), // back
+                new THREE.MeshBasicMaterial({ color: 0x0a0a0a, wireframe: true }), // front
+                new THREE.MeshBasicMaterial({ color: 0xd4f060 }), // top
+                new THREE.MeshBasicMaterial({ color: 0x111111 }), // bottom
+                new THREE.MeshBasicMaterial({ color: 0xf06040 }), // right
+                new THREE.MeshBasicMaterial({ color: 0x222222 }), // left
+            ];
+            cube = new THREE.Mesh(geometry, materials);
+            scene.add(cube);
+
+            // Add subtle ambient light
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+
+            // Add directional light
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(5, 5, 5);
+            scene.add(directionalLight);
+
+            window.addEventListener('resize', onWindowResize);
+            onWindowResize();
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            // Smooth rotation towards target
+            rotationX += (targetRotationX - rotationX) * 0.05;
+            rotationY += (targetRotationY - rotationY) * 0.05;
+
+            cube.rotation.x = rotationX;
+            cube.rotation.y = rotationY;
+
+            // Gentle idle rotation
+            cube.rotation.z += 0.001;
+
+            renderer.render(scene, camera);
+        }
+
+        // Scroll handling
+        const sections = document.querySelectorAll('.section');
+        let currentSection = 0;
+
+        function updateCubeRotation() {
+            const totalSections = sections.length;
+            const sectionHeight = window.innerHeight;
+            const scrollY = window.scrollY;
+            scrollProgress = scrollY / (sectionHeight * (totalSections - 1));
+
+            // Map scroll progress to cube rotation
+            targetRotationX = scrollProgress * Math.PI * 2;
+            targetRotationY = scrollProgress * Math.PI;
+
+            // Update active section
+            const index = Math.floor(scrollY / sectionHeight);
+            sections.forEach((sec, i) => {
+                if (i === index) {
+                    sec.classList.add('active');
+                } else {
+                    sec.classList.remove('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateCubeRotation);
+        window.addEventListener('load', updateCubeRotation);
+
+        // Initialize
+        init();
+        animate();
+        updateCubeRotation();
+
+        // Marquee animation
+        const marqueeTrack = document.querySelector('.marquee-track');
+        if (marqueeTrack) {
+            marqueeTrack.style.animation = 'marquee 30s linear infinite';
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes marquee {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.6; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
+</body>
+</html>

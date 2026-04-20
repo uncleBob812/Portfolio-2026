@@ -170,6 +170,10 @@ body:hover .cursor-ring {
     color: var(--accent-primary) !important;
 }
 
+.nav-experimental {
+    color: var(--accent-secondary) !important;
+}
+
 /* Hero */
 .hero {
     min-height: 100vh;
