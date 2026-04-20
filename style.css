@@ -302,6 +302,33 @@ body:hover .cursor-ring {
     gap: var(--space-sm);
 }
 
+/* Client Logos */
+.client-logos {
+    margin-top: var(--space-lg);
+    overflow: hidden;
+}
+
+.logos-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-md);
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    font-size: 1.125rem;
+    color: var(--text-muted);
+}
+
+.logos-strip span {
+    white-space: nowrap;
+    transition: color var(--transition-fast);
+}
+
+.logos-strip span:hover {
+    color: var(--accent-primary);
+}
+
 /* Work */
 .work {
     padding: var(--space-xl) 0;
