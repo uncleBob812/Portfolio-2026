@@ -533,6 +533,110 @@ body:hover .cursor-ring {
     transform: translateY(0);
 }
 
+/* Case Study Pages */
+.case-study {
+    padding-top: 120px;
+}
+
+.case-hero {
+    padding: var(--space-xl) 0 var(--space-lg);
+}
+
+.back-link {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--space-md);
+    display: inline-block;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+.case-tags {
+    display: flex;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+}
+
+.case-title {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.1;
+    margin-bottom: var(--space-sm);
+}
+
+.case-subtitle {
+    font-size: clamp(1.125rem, 2.5vw, 1.5rem);
+    color: var(--text-secondary);
+    max-width: 800px;
+    margin-bottom: var(--space-lg);
+}
+
+.case-meta {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-md);
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    padding: var(--space-md) 0;
+}
+
+.meta-item {
+    font-size: 0.9rem;
+}
+
+.case-content {
+    padding: var(--space-xl) 0;
+}
+
+.case-image-placeholder {
+    margin-bottom: var(--space-xl);
+    border: 1px solid var(--border-color);
+}
+
+.case-text h2 {
+    font-family: var(--font-heading);
+    font-weight: var(--font-weight-heading);
+    font-size: 1.75rem;
+    margin: var(--space-lg) 0 var(--space-sm);
+}
+
+.case-text p {
+    color: var(--text-secondary);
+    margin-bottom: var(--space-md);
+    line-height: 1.7;
+}
+
+.case-text ul {
+    color: var(--text-secondary);
+    padding-left: 1.5rem;
+    margin-bottom: var(--space-md);
+}
+
+.case-text li {
+    margin-bottom: 0.5rem;
+}
+
+.case-navigation {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.nav-next {
+    color: var(--accent-primary);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+
+.nav-next:hover {
+    text-decoration: underline;
+}
+
 /* Responsive */
 @media (max-width: 767px) {
     .hero-title {
